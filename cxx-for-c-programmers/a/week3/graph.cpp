@@ -38,8 +38,8 @@ public:
   // will invoke vectors' destructor automatically
   // ~Graf() {}
 
-  // get number of verticies
-  size_t get_n_verticies() const {
+  // get number of vertices
+  size_t get_n_vertices() const {
     return m_n_v;
   }
   // get number of edges
@@ -58,7 +58,7 @@ public:
   void delete_edge(size_t x, size_t y) {
     set_edge(x, y, -1);
   }
-  // check if there is an edge between verticies x and y 
+  // check if there is an edge between vertices x and y 
   bool adjacent(size_t x, size_t y) const {
     return get_edge(x, y) >= 0;
   }
