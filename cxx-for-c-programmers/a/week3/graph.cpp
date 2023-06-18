@@ -1,9 +1,12 @@
+#include <bits/types/sigset_t.h>
 #include <cstddef>
+#include <limits>
 #include <ostream>
 #include <vector>
 #include <iostream>
 #include <random>
 #include <iomanip>
+#include <map>
 
 using namespace std;
 
@@ -36,7 +39,7 @@ public:
   }
   // we don't need to specify a custom destructor for the class since the default one 
   // will invoke vectors' destructor automatically
-  // ~Graf() {}
+  // ~Graph() {}
 
   // get number of vertices
   size_t get_n_vertices() const {
@@ -118,6 +121,73 @@ Graph::Graph(size_t n_v, double density, double min_distance=1.0, double max_dis
     }
   }
 }
+
+class PriorityQueue {
+public:
+
+  void set(size_t vertex, double distance) {
+    if (contains(vertex)) {
+      m_storage[vertex] = distance;      
+    } else {
+      m_storage.insert({vertex, distance});
+    }
+  }
+
+  bool contains(size_t vertex) const {
+    auto found = m_storage.find(vertex);
+    return found != m_storage.end();
+  }
+
+  size_t size() const {
+    return m_storage.size();
+  }
+
+  pair<size_t, double> top() const {
+    pair<size_t, double> result = {0, numeric_limits<double>::infinity()}; 
+    for (auto it = m_storage.begin(); it != m_storage.end(); ++it) {
+      if (it->second < result.second) {
+        result.first = it->first;
+        result.second = it->second;
+      }
+    }
+    return result;
+  }
+
+  pair<size_t, double> pop() {
+    const auto t = top(); 
+    m_storage.erase(t.first);
+    return t;
+  }
+
+private:
+  map<size_t, double> m_storage;
+};
+
+class ShortestPath {
+public:
+  ShortestPath(const Graph& graph, size_t from, size_t to)
+  : m_graph(graph) 
+  , m_from_vertex(from)
+  , m_to_vertex(to) 
+  , m_current_vertex(from) {
+    for (size_t i = 0; i < m_graph.get_n_vertices(); ++i) {
+      m_unexported.set(i, numeric_limits<double>::infinity());
+    }
+  }  
+
+private:
+  void update_estimates() {
+    
+  }
+  size_t choose_next_vertex() {
+    return 0;
+  }
+  Graph m_graph;
+  size_t m_from_vertex;
+  size_t m_to_vertex;
+  size_t m_current_vertex;
+  PriorityQueue m_unexported;
+};
 
 int main() {
   Graph g1(10, 0.2);
