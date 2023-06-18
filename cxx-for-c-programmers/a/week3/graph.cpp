@@ -10,7 +10,11 @@ using namespace std;
 class Graph {
 public:
   Graph(size_t n_v, double density, double min_distance, double max_distance);
-
+  Graph(size_t n_v=10)
+  : m_n_v(n_v)
+  , m_n_e(0) 
+  , m_matrix(n_v, vector<double>(n_v, -1)){}
+  
   size_t n_v() const {
     return m_n_v;
   }
@@ -66,13 +70,10 @@ Graph::Graph(size_t n_v, double density, double min_distance=1.0, double max_dis
 
 int main() {
   Graph g1(10, 0.2);
-  cout << "g1 v: " << g1.n_v() << " e: " << g1.n_e() << endl;
-  Graph g2(20, 0.3);
-  cout << "g2 v: " << g2.n_v() << " e: " << g2.n_e() << endl;
-  Graph g3(30, 0.4);
-  cout << "g3 v: " << g3.n_v() << " e: " << g3.n_e() << endl;
-  Graph g4(40, 0.5);
-  cout << "g4 v: " << g4.n_v() << " e: " << g4.n_e() << endl;
-  cout << g1;
+  cout << g1 << endl;
+  Graph g2;
+  cout << g2 << endl;
+  Graph g3(20);
+  cout << g3 << endl;
   return 0;
 }
