@@ -10,12 +10,12 @@ using namespace std;
 class Graph {
 public:
   Graph(size_t n_v, double density, double min_distance, double max_distance);
-
+  // default constructor implementation
   Graph(size_t n_v=10)
   : m_n_v(n_v)
   , m_n_e(0) 
   , m_matrix(n_v, vector<double>(n_v, -1)) {}
-
+  // copy constructor implementation
   Graph(const Graph& other)
   : m_n_v(other.m_n_v)
   , m_n_e(other.m_n_e) 
@@ -26,7 +26,7 @@ public:
       }
     }
   }
-
+  // move constructor implementation
   Graph(Graph&& other) noexcept
   : m_n_v(other.m_n_v)
   , m_n_e(other.m_n_e) 
@@ -34,15 +34,35 @@ public:
     other.m_n_v = 0;
     other.m_n_e = 0;
   }
-  
-  size_t n_v() const {
+  // we don't need to specify a custom destructor for the class since the default one 
+  // will invoke vectors' destructor automatically
+  // ~Graf() {}
+
+  // number of verticies getter
+  size_t get_n_verticies() const {
     return m_n_v;
   }
-
-  size_t n_e() const {
+  // number of edges getter
+  size_t get_n_edges() const {
     return m_n_e;
   }
-
+  // edge value getter, negative value means there is no edge
+  double get_edge(size_t x, size_t y) const {
+    return m_matrix[x][y];
+  }
+  // edge value setter, negative value means there is no edge
+  void set_edge(size_t x, size_t y, double value) {
+    m_matrix[x][y] = m_matrix[y][x] = value;
+  }
+  // an alias for set_edge(x, y, -1)
+  void delete_edge(size_t x, size_t y) {
+    set_edge(x, y, -1);
+  }
+  // check if there is an edge between x and y 
+  bool adjacent(size_t x, size_t y) {
+    return get_edge(x, y) >= 0;
+  }
+  // output to a stream operator overloading 
   friend ostream& operator<<(ostream& os, Graph const& g) {
     for (int i = 0; i < g.m_n_v; ++i) {
       for (int j = 0; j < g.m_n_v; ++j) {
