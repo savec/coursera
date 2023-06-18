@@ -26,6 +26,14 @@ public:
       }
     }
   }
+
+  Graph(Graph&& other) noexcept
+  : m_n_v(other.m_n_v)
+  , m_n_e(other.m_n_e) 
+  , m_matrix(std::move(other.m_matrix)) {
+    other.m_n_v = 0;
+    other.m_n_e = 0;
+  }
   
   size_t n_v() const {
     return m_n_v;
@@ -83,7 +91,7 @@ Graph::Graph(size_t n_v, double density, double min_distance=1.0, double max_dis
 int main() {
   Graph g1(10, 0.2);
   cout << g1 << endl;
-  Graph g2 = g1;
+  Graph g2 = std::move(g1);
   cout << g2 << endl;
   return 0;
 }
