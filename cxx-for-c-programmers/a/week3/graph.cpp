@@ -58,9 +58,19 @@ public:
   void delete_edge(size_t x, size_t y) {
     set_edge(x, y, -1);
   }
-  // check if there is an edge between x and y 
-  bool adjacent(size_t x, size_t y) {
+  // check if there is an edge between verticies x and y 
+  bool adjacent(size_t x, size_t y) const {
     return get_edge(x, y) >= 0;
+  }
+  // get list of neighbors of the vertex x
+  vector<size_t> get_neighbors(size_t x) const {
+    vector<size_t> neighbors;
+    for (size_t i = 0; i < m_n_v; ++i) {
+      if (m_matrix[x][i] >= 0) {
+        neighbors.push_back(i);
+      }
+    }
+    return neighbors;
   }
   // output to a stream operator overloading 
   friend ostream& operator<<(ostream& os, Graph const& g) {
@@ -113,5 +123,10 @@ int main() {
   cout << g1 << endl;
   Graph g2 = std::move(g1);
   cout << g2 << endl;
+  cout << "Neighbors of 3: ";
+  for (const auto& v : g2.get_neighbors(3))
+     cout << v << ", ";
+  cout << endl;
+
   return 0;
 }
