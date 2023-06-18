@@ -38,19 +38,19 @@ public:
   // will invoke vectors' destructor automatically
   // ~Graf() {}
 
-  // number of verticies getter
+  // get number of verticies
   size_t get_n_verticies() const {
     return m_n_v;
   }
-  // number of edges getter
+  // get number of edges
   size_t get_n_edges() const {
     return m_n_e;
   }
-  // edge value getter, negative value means there is no edge
+  // get edge value from vertex x to vertex y, negative value means there is no edge
   double get_edge(size_t x, size_t y) const {
     return m_matrix[x][y];
   }
-  // edge value setter, negative value means there is no edge
+  // set edge value from vertex x to vertex y, negative value means there is no edge
   void set_edge(size_t x, size_t y, double value) {
     m_matrix[x][y] = m_matrix[y][x] = value;
   }
@@ -72,6 +72,8 @@ public:
     }
     return neighbors;
   }
+
+private:
   // output to a stream operator overloading 
   friend ostream& operator<<(ostream& os, Graph const& g) {
     for (int i = 0; i < g.m_n_v; ++i) {
@@ -88,7 +90,6 @@ public:
     return os;
   }
 
-private:
   vector<vector<double>> m_matrix;  
   size_t m_n_v;
   size_t m_n_e;
