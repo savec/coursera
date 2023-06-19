@@ -78,7 +78,7 @@ public:
   }
 
 private:
-  // output to a stream operator overloading 
+  // output to a stream operator overload 
   friend ostream& operator<<(ostream& os, Graph const& g) {
     for (int i = 0; i < g.m_n_v; ++i) {
       for (int j = 0; j < g.m_n_v; ++j) {
@@ -131,10 +131,12 @@ public:
     }
   }
   
-  void update(size_t vertex, double distance) {
+  bool update(size_t vertex, double distance) {
     if (contains(vertex) && m_storage[vertex] > distance) {
       m_storage[vertex] = distance;
+      return true;
     }
+    return false;
   }
 
   double distance(size_t vertex) {
@@ -179,13 +181,17 @@ public:
   : m_graph(graph) 
   , m_to_vertex(to) 
   , m_from_vertex(from) 
-  , m_unexplored(graph.get_n_vertices()){ 
+  , m_unexplored(graph.get_n_vertices())
+  , m_trace(graph.get_n_vertices(), to) { 
     m_unexplored.update(from, 0);
   }  
 
   double find() {
+    if(m_to_vertex >= m_graph.get_n_vertices()) {
+      return numeric_limits<double>::infinity();
+    }
     auto current_vertex = m_from_vertex;
-    auto current_distance = 0.0;
+    auto current_distance = double(0);
     while(true) {
       update_estimates(current_vertex, current_distance);
       const auto next = choose_next_vertex();
@@ -200,28 +206,54 @@ public:
     }
     return numeric_limits<double>::infinity();
   }
+
 private:
   void update_estimates(size_t current_vertex, double current_distance) {
     cout << "neighbors: ";
     for (const auto& neighbor: m_graph.get_neighbors(current_vertex)) {
       cout << neighbor << "[" << current_distance + m_graph.get_edge(current_vertex, neighbor) << "] ";
-      m_unexplored.update(neighbor, current_distance + m_graph.get_edge(current_vertex, neighbor));
+      if (m_unexplored.update(neighbor, current_distance + m_graph.get_edge(current_vertex, neighbor))) {
+        m_trace[neighbor] = current_vertex;
+      }
     }
     cout << endl;
   }
   pair<size_t, double> choose_next_vertex() {
     return m_unexplored.pop();
   }
+
+  // output to a stream operator overload 
+  friend ostream& operator<<(ostream& os, ShortestPath& p) {
+    if (p.m_trace.size() <= p.m_to_vertex || p.m_trace[p.m_to_vertex] == p.m_to_vertex) {
+      os << "none";
+      return os;
+    }
+    vector<size_t> route;
+    for (size_t  v = p.m_to_vertex; v != p.m_from_vertex; v = p.m_trace[v]) {
+      route.push_back(v);
+    }
+    route.push_back(p.m_from_vertex);
+
+    auto v = route.rbegin();
+    os << *v++;
+    for (; v != route.rend(); ++v) {
+      os << "->" << *v; 
+    }
+
+    return os;
+  }
+
   Graph m_graph;
   size_t m_to_vertex;
   size_t m_from_vertex;
   PriorityQueue m_unexplored;
+  vector<size_t> m_trace;
 };
 
 int main() {
-  Graph g1(10, 0.2);
+  Graph g1(20, 0.2);
   cout << g1 << endl;
-  ShortestPath path(g1, 0, 9);
-  cout << path.find() << endl;
+  ShortestPath path(g1, 0, 19);
+  cout << path.find() << " " << path << endl;
   return 0;
 }
