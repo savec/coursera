@@ -1,5 +1,6 @@
 #include <bits/types/sigset_t.h>
 #include <cstddef>
+#include <iterator>
 #include <limits>
 #include <ostream>
 #include <vector>
@@ -136,6 +137,13 @@ public:
     }
   }
 
+  double distance(size_t vertex) {
+    if (contains(vertex)) {
+      return m_storage[vertex];
+    }
+    return numeric_limits<double>::infinity();
+  }
+
   bool contains(size_t vertex) const {
     auto found = m_storage.find(vertex);
     return found != m_storage.end();
@@ -149,8 +157,7 @@ public:
     pair<size_t, double> result = {0, numeric_limits<double>::infinity()}; 
     for (auto it = m_storage.begin(); it != m_storage.end(); ++it) {
       if (it->second < result.second) {
-        result.first = it->first;
-        result.second = it->second;
+        result = *it;
       }
     }
     return result;
@@ -170,41 +177,51 @@ class ShortestPath {
 public:
   ShortestPath(const Graph& graph, size_t from, size_t to)
   : m_graph(graph) 
-  , m_from_vertex(from)
   , m_to_vertex(to) 
-  , m_current_vertex(from) 
-  , m_unexported(graph.get_n_vertices()){ }  
+  , m_from_vertex(from) 
+  , m_unexplored(graph.get_n_vertices()){ 
+    m_unexplored.update(from, 0);
+  }  
 
-private:
-  void update_estimates() {
-       
+  double find() {
+    auto current_vertex = m_from_vertex;
+    auto current_distance = 0.0;
+    while(true) {
+      update_estimates(current_vertex, current_distance);
+      const auto next = choose_next_vertex();
+      current_vertex = next.first;
+      current_distance = next.second;
+      cout << "Current vertex: " << current_vertex << ": " << current_distance << endl;
+      if (current_vertex == m_to_vertex) {
+        return current_distance;
+      } else if (current_distance == numeric_limits<double>::infinity()) {
+        break;
+      }
+    }
+    return numeric_limits<double>::infinity();
   }
-  size_t choose_next_vertex() {
-    return 0;
+private:
+  void update_estimates(size_t current_vertex, double current_distance) {
+    cout << "neighbors: ";
+    for (const auto& neighbor: m_graph.get_neighbors(current_vertex)) {
+      cout << neighbor << "[" << current_distance + m_graph.get_edge(current_vertex, neighbor) << "] ";
+      m_unexplored.update(neighbor, current_distance + m_graph.get_edge(current_vertex, neighbor));
+    }
+    cout << endl;
+  }
+  pair<size_t, double> choose_next_vertex() {
+    return m_unexplored.pop();
   }
   Graph m_graph;
-  size_t m_from_vertex;
   size_t m_to_vertex;
-  size_t m_current_vertex;
-  PriorityQueue m_unexported;
+  size_t m_from_vertex;
+  PriorityQueue m_unexplored;
 };
 
 int main() {
-  // Graph g1(10, 0.2);
-  // cout << g1 << endl;
-  // Graph g2 = std::move(g1);
-  // cout << g2 << endl;
-  // cout << "Neighbors of 3: ";
-  // for (const auto& v : g2.get_neighbors(3))
-  //    cout << v << ", ";
-  // cout << endl;
-  PriorityQueue q(3);
-
-  q.update(0, 7);
-  q.update(1, 1);
-  q.update(2, 9);
-
-  cout << q.pop().second << q.pop().second << q.pop().second << q.pop().second << endl;  
-  cout << (numeric_limits<double>::infinity() > 4) << endl;
+  Graph g1(10, 0.2);
+  cout << g1 << endl;
+  ShortestPath path(g1, 0, 9);
+  cout << path.find() << endl;
   return 0;
 }
