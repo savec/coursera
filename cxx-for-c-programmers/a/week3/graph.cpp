@@ -130,11 +130,9 @@ public:
     }
   }
   
-  void set(size_t vertex, double distance) {
-    if (contains(vertex)) {
-      m_storage[vertex] = distance;      
-    } else {
-      m_storage.insert({vertex, distance});
+  void update(size_t vertex, double distance) {
+    if (contains(vertex) && m_storage[vertex] > distance) {
+      m_storage[vertex] = distance;
     }
   }
 
@@ -179,7 +177,7 @@ public:
 
 private:
   void update_estimates() {
-    
+       
   }
   size_t choose_next_vertex() {
     return 0;
@@ -202,10 +200,11 @@ int main() {
   // cout << endl;
   PriorityQueue q(3);
 
-  q.set(0, 7);
-  q.set(1, 1);
-  q.set(2, 9);
+  q.update(0, 7);
+  q.update(1, 1);
+  q.update(2, 9);
 
   cout << q.pop().second << q.pop().second << q.pop().second << q.pop().second << endl;  
+  cout << (numeric_limits<double>::infinity() > 4) << endl;
   return 0;
 }
