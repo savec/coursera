@@ -124,7 +124,12 @@ Graph::Graph(size_t n_v, double density, double min_distance=1.0, double max_dis
 
 class PriorityQueue {
 public:
-
+  PriorityQueue(size_t size) {
+    for (size_t i = 0; i < size; ++i) {
+      m_storage.insert({i, numeric_limits<double>::infinity()});
+    }
+  }
+  
   void set(size_t vertex, double distance) {
     if (contains(vertex)) {
       m_storage[vertex] = distance;      
@@ -169,11 +174,8 @@ public:
   : m_graph(graph) 
   , m_from_vertex(from)
   , m_to_vertex(to) 
-  , m_current_vertex(from) {
-    for (size_t i = 0; i < m_graph.get_n_vertices(); ++i) {
-      m_unexported.set(i, numeric_limits<double>::infinity());
-    }
-  }  
+  , m_current_vertex(from) 
+  , m_unexported(graph.get_n_vertices()){ }  
 
 private:
   void update_estimates() {
@@ -190,14 +192,20 @@ private:
 };
 
 int main() {
-  Graph g1(10, 0.2);
-  cout << g1 << endl;
-  Graph g2 = std::move(g1);
-  cout << g2 << endl;
-  cout << "Neighbors of 3: ";
-  for (const auto& v : g2.get_neighbors(3))
-     cout << v << ", ";
-  cout << endl;
+  // Graph g1(10, 0.2);
+  // cout << g1 << endl;
+  // Graph g2 = std::move(g1);
+  // cout << g2 << endl;
+  // cout << "Neighbors of 3: ";
+  // for (const auto& v : g2.get_neighbors(3))
+  //    cout << v << ", ";
+  // cout << endl;
+  PriorityQueue q(3);
 
+  q.set(0, 7);
+  q.set(1, 1);
+  q.set(2, 9);
+
+  cout << q.pop().second << q.pop().second << q.pop().second << q.pop().second << endl;  
   return 0;
 }
