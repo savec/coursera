@@ -9,6 +9,7 @@
 #include <map>
 
 using namespace std;
+
 // class Graph - implements graph ADT, using adjacency matrix representation (for sake of simplicity)
 // public methods:
 //    size_t get_n_vertices() const
@@ -18,7 +19,6 @@ using namespace std;
 //    void delete_edge(size_t x, size_t y)
 //    bool adjacent(size_t x, size_t y) const
 //    vector<size_t> get_neighbors(size_t x) const
-
 class Graph {
 public:
   Graph(size_t n_v, double density, double min_distance, double max_distance);
@@ -106,6 +106,7 @@ private:
   size_t m_n_v;
   size_t m_n_e;
 };
+
 // the constructor creates a weighted undirected graph with n_v vertices and randomly builds 
 // edges so to correspond the desired density; the weight of each edge is choosen randomly from 
 // the range (min_distance, max_distance) 
@@ -133,6 +134,7 @@ Graph::Graph(size_t n_v, double density, double min_distance=1.0, double max_dis
     }
   }
 }
+
 // class PriorityQueue - a helper class, implements a priority queue
 // in contrast to std::priority_queue provides methods for updating random elements
 // public methods:
@@ -299,10 +301,34 @@ double ShortestPath::find() {
   return numeric_limits<double>::infinity();
 }
 
+double compute_average_path_length(Graph& g) {
+  size_t iterations = 0;
+  double total_length = 0;
+  for (size_t i = 1; i < g.get_n_vertices(); ++i) {
+    ShortestPath path(g, 0, i);
+    const auto l = path.find(); 
+    if (l == numeric_limits<double>::infinity()) {
+      continue;
+    }
+    total_length += l, ++iterations;
+  }
+  return total_length/iterations;
+}
+
 int main() {
-  Graph g1(20, 0.1);
-  cout << g1 << endl;
-  ShortestPath path(g1, 0, 19);
-  cout << path.find() << ": " << path << endl;
+  Graph g1(50, 0.2);
+  cout 
+    << "Average path length for " 
+    << g1.get_n_vertices() 
+    << " vertices (density = 20%, edge_length = [1.0, 10.0]): " 
+    << compute_average_path_length(g1) 
+    << endl;
+  Graph g2(50, 0.4);
+  cout 
+    << "Average path length for " 
+    << g2.get_n_vertices() 
+    << " vertices (density = 40%, edge_length = [1.0, 10.0]): " 
+    << compute_average_path_length(g2) 
+    << endl;
   return 0;
 }
