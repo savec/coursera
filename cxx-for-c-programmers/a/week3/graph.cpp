@@ -332,3 +332,8 @@ int main() {
     << endl;
   return 0;
 }
+/*
+ * $ ./a.out
+ * Average path length for 50 vertices (density = 20%, edge_length = [1.0, 10.0]): 4.34886
+ * Average path length for 50 vertices (density = 40%, edge_length = [1.0, 10.0]): 3.43761
+ */
