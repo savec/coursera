@@ -4,6 +4,7 @@
 #include <ostream>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <random>
 #include <iomanip>
 #include <map>
@@ -46,6 +47,20 @@ public:
     other.m_n_v = 0;
     other.m_n_e = 0;
   }
+  // init from file
+  Graph(const string& filename) 
+  : m_n_e(0) {
+    ifstream input(filename);
+    istream_iterator<string> cursor(input), end;
+    m_n_v = stoi(*cursor++);
+    m_matrix.resize(m_n_v, vector<double>(m_n_v, -1));
+    while(cursor != end) {
+      const size_t x = stoi(*cursor++);
+      const size_t y = stoi(*cursor++);
+      const size_t v = stoi(*cursor++);
+      add_edge(x, y, v);
+    }
+  }
   // we don't need to specify a custom destructor for the class since the default one 
   // will invoke vectors' destructor automatically
   // ~Graph() {}
@@ -62,13 +77,19 @@ public:
   double get_edge(size_t x, size_t y) const {
     return m_matrix[x][y];
   }
-  // set edge value from vertex x to vertex y, negative value means there is no edge
-  void set_edge(size_t x, size_t y, double value) {
-    m_matrix[x][y] = m_matrix[y][x] = value;
+  // add edge value from vertex x to vertex y
+  void add_edge(size_t x, size_t y, double value) {
+    if (!adjacent(x, y)) {
+      set_edge(x, y, value);
+      m_n_e ++;
+    }
   }
   // an alias for set_edge(x, y, -1)
   void delete_edge(size_t x, size_t y) {
-    set_edge(x, y, -1);
+    if (!adjacent(x, y)) {
+      set_edge(x, y, -1);
+      m_n_e --;
+    }
   }
   // check if there is an edge between vertices x and y 
   bool adjacent(size_t x, size_t y) const {
@@ -86,6 +107,10 @@ public:
   }
 
 private:
+  // set edge value from vertex x to vertex y, negative value means there is no edge
+  void set_edge(size_t x, size_t y, double value) {
+    m_matrix[x][y] = m_matrix[y][x] = value;
+  }
   // output to a stream operator overload 
   friend ostream& operator<<(ostream& os, Graph const& g) {
     for (int i = 0; i < g.m_n_v; ++i) {
@@ -316,20 +341,22 @@ double compute_average_path_length(Graph& g) {
 }
 
 int main() {
-  Graph g1(50, 0.2);
-  cout 
-    << "Average path length for " 
-    << g1.get_n_vertices() 
-    << " vertices (density = 20%, edge_length = [1.0, 10.0]): " 
-    << compute_average_path_length(g1) 
-    << endl;
-  Graph g2(50, 0.4);
-  cout 
-    << "Average path length for " 
-    << g2.get_n_vertices() 
-    << " vertices (density = 40%, edge_length = [1.0, 10.0]): " 
-    << compute_average_path_length(g2) 
-    << endl;
+  // Graph g1(50, 0.2);
+  // cout 
+  //   << "Average path length for " 
+  //   << g1.get_n_vertices() 
+  //   << " vertices (density = 20%, edge_length = [1.0, 10.0]): " 
+  //   << compute_average_path_length(g1) 
+  //   << endl;
+  // Graph g2(50, 0.4);
+  // cout 
+  //   << "Average path length for " 
+  //   << g2.get_n_vertices() 
+  //   << " vertices (density = 40%, edge_length = [1.0, 10.0]): " 
+  //   << compute_average_path_length(g2) 
+  //   << endl;
+  Graph g("sample.txt");
+  cout << g << endl;
   return 0;
 }
 /*
