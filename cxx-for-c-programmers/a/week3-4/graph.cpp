@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdio>
 #include <iterator>
 #include <limits>
 #include <ostream>
@@ -214,8 +215,12 @@ public:
   // returns an element with the least distance and removes it from the queue
   pair<size_t, double> pop() {
     const auto t = top(); 
-    m_storage.erase(t.first);
+    remove(t.first);
     return t;
+  }
+  // remove an element from the queue
+  void remove(size_t vertex) {
+    m_storage.erase(vertex);
   }
 
 private:
@@ -326,6 +331,62 @@ double ShortestPath::find() {
   return numeric_limits<double>::infinity();
 }
 
+// reducing of the input graph to the MSP
+// public methods:
+//   double find(size_t start=0)
+//   Graph msp() const 
+class MinimumSpanningTree {
+public:
+  MinimumSpanningTree(const Graph& graph) 
+  : m_graph(graph)
+  , m_msp(graph.get_n_vertices())
+  , m_unexplored(graph.get_n_vertices())
+  , m_edge_to(graph.get_n_vertices(), numeric_limits<size_t>::infinity()) { }  
+
+  // implements Prim's algorithm for finding a minimum spanning tree
+  double find(size_t start=0) {
+    size_t pre = start;
+    double sum = 0;
+    update_estimates(pre);
+    m_unexplored.remove(pre);
+    while (m_unexplored.size() > 0) {
+      const auto next = choose_next_vertex();
+      const auto v = next.first;
+      const auto d = next.second;
+      m_msp.add_edge(pre, v, d);
+      sum += d;
+      pre = v;
+      update_estimates(pre);
+    }
+    return sum;
+  }
+  // get MSP found
+  const Graph& msp() const {
+    return m_msp;
+  }
+
+private:
+  pair<size_t, double> choose_next_vertex() {
+    return m_unexplored.pop();
+  }
+
+  void update_estimates(size_t current_vertex) {
+    for (const auto& neighbor: m_graph.get_neighbors(current_vertex)) {
+      if (m_unexplored.contains(neighbor)) {
+        const auto l = m_graph.get_edge(current_vertex, neighbor);
+        if (m_unexplored.update(neighbor, l)) {
+          m_edge_to[neighbor] = l ;
+        }
+      }
+    }
+  }
+
+  Graph m_graph;
+  Graph m_msp;
+  vector<size_t> m_edge_to;
+  PriorityQueue m_unexplored;
+};
+
 double compute_average_path_length(Graph& g) {
   size_t iterations = 0;
   double total_length = 0;
@@ -341,26 +402,34 @@ double compute_average_path_length(Graph& g) {
 }
 
 int main() {
-  // Graph g1(50, 0.2);
-  // cout 
-  //   << "Average path length for " 
-  //   << g1.get_n_vertices() 
-  //   << " vertices (density = 20%, edge_length = [1.0, 10.0]): " 
-  //   << compute_average_path_length(g1) 
-  //   << endl;
-  // Graph g2(50, 0.4);
-  // cout 
-  //   << "Average path length for " 
-  //   << g2.get_n_vertices() 
-  //   << " vertices (density = 40%, edge_length = [1.0, 10.0]): " 
-  //   << compute_average_path_length(g2) 
-  //   << endl;
   Graph g("sample.txt");
-  cout << g << endl;
+  MinimumSpanningTree msp(g);
+  cout << "MSP length = " << msp.find() << endl;
+  cout << msp.msp() << endl;
   return 0;
 }
 /*
- * $ ./a.out
- * Average path length for 50 vertices (density = 20%, edge_length = [1.0, 10.0]): 4.34886
- * Average path length for 50 vertices (density = 40%, edge_length = [1.0, 10.0]): 3.43761
- */
+$ ./a.out
+MSP length = 30
+[---] [---] [2.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---]
+[---] [---] [---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [1.0] [---] [---]
+[2.0] [---] [---] [---] [---] [---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---]
+[---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [1.0] [1.0] [---] [---] [---] [---] [---] [---] [---]
+[---] [---] [---] [---] [---] [---] [---] [1.0] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---]
+[---] [---] [---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [1.0] [---]
+[---] [1.0] [---] [---] [---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---]
+[---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---] [2.0] [---] [---] [---] [---] [---] [---] [---] [---] [---]
+[---] [---] [---] [---] [1.0] [---] [---] [---] [---] [3.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---]
+[---] [---] [1.0] [---] [---] [---] [---] [---] [3.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---]
+[---] [---] [---] [---] [---] [---] [---] [2.0] [---] [---] [---] [---] [---] [---] [---] [2.0] [---] [---] [---] [---]
+[---] [---] [---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---]
+[---] [---] [---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [3.0]
+[---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [3.0] [---] [---] [---]
+[---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---] [1.0] [---] [---]
+[---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [2.0] [---] [---] [---] [---] [---] [---] [---] [---] [2.0]
+[---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [3.0] [---] [---] [---] [---] [2.0] [---]
+[---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---]
+[---] [---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [2.0] [---] [---] [---]
+[---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [3.0] [---] [---] [2.0] [---] [---] [---] [---] 
+
+*/
