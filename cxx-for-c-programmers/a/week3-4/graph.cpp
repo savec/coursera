@@ -331,15 +331,15 @@ double ShortestPath::find() {
   return numeric_limits<double>::infinity();
 }
 
-// reducing of the input graph to the MSP
+// reducing of the input graph to the MST
 // public methods:
 //   double find(size_t start=0)
-//   Graph msp() const 
+//   Graph mst() const 
 class MinimumSpanningTree {
 public:
   MinimumSpanningTree(const Graph& graph) 
   : m_graph(graph)
-  , m_msp(graph.get_n_vertices())
+  , m_mst(graph.get_n_vertices())
   , m_unexplored(graph.get_n_vertices())
   , m_edge_to(graph.get_n_vertices(), numeric_limits<size_t>::infinity()) { }  
 
@@ -353,16 +353,16 @@ public:
       const auto next = choose_next_vertex();
       const auto v = next.first;
       const auto d = next.second;
-      m_msp.add_edge(pre, v, d);
+      m_mst.add_edge(pre, v, d);
       sum += d;
       pre = v;
       update_estimates(pre);
     }
     return sum;
   }
-  // get MSP found
-  const Graph& msp() const {
-    return m_msp;
+  // get MST found
+  const Graph& mst() const {
+    return m_mst;
   }
 
 private:
@@ -382,7 +382,7 @@ private:
   }
 
   Graph m_graph;
-  Graph m_msp;
+  Graph m_mst;
   vector<size_t> m_edge_to;
   PriorityQueue m_unexplored;
 };
@@ -403,14 +403,14 @@ double compute_average_path_length(Graph& g) {
 
 int main() {
   Graph g("sample.txt");
-  MinimumSpanningTree msp(g);
-  cout << "MSP length = " << msp.find() << endl;
-  cout << msp.msp() << endl;
+  MinimumSpanningTree mst(g);
+  cout << "MST length = " << mst.find() << endl;
+  cout << mst.mst() << endl;
   return 0;
 }
 /*
 $ ./a.out
-MSP length = 30
+MST length = 30
 [---] [---] [2.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---]
 [---] [---] [---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---] [1.0] [---] [---]
 [2.0] [---] [---] [---] [---] [---] [---] [---] [---] [1.0] [---] [---] [---] [---] [---] [---] [---] [---] [---] [---]
